@@ -1,0 +1,52 @@
+import discord
+from discord import app_commands
+import random
+
+# Bot Ayarları
+TOKEN = 'TOKEN'
+ONLEMLER_KANAL_ID = ID  # <--- Buraya 'onlemler' kanalının ID'sini yapıştır!
+
+# Buton Sınıfı
+class OnlemButonu(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None) # Butonun süresiz aktif kalması için
+
+    @discord.ui.button(label="İklimi Korumak İçin 10 Önlem", style=discord.ButtonStyle.green, custom_id="onlem_butonu")
+    async def onlem_callback(self, interaction: discord.Interaction, button: discord.ui.Button):
+        onlemler_metni = (
+            "🌍 **İklim Değişikliğini Önlemek İçin Yapabileceğiniz 10 Şey:**\n\n"
+            "1. **Enerji Tasarrufu Yapın:** Kullanmadığınız ışıkları kapatın ve LED ampullere geçin.\n"
+            "2. **Ulaşım Tercihlerinizi Değiştirin:** Mümkünse yürüyün, bisiklete binin veya toplu taşımayı kullanın.\n"
+            "3. **Et Tüketimini Azaltın:** Bitki bazlı beslenmeye ağırlık vermek karbon ayak izinizi büyük oranda düşürür.\n"
+            "4. **Geri Dönüşüme Önem Verin:** Kağıt, plastik ve cam atıklarınızı mutlaka ayırın.\n"
+            "5. **Su Tasarrufu:** Diş fırçalarken musluğu kapatın ve kısa duşlar alın.\n"
+            "6. **Plastik Kullanımını Azaltın:** Tek kullanımlık plastikler yerine bez çanta ve matara kullanın.\n"
+            "7. **Yerel Ürünleri Tercih Edin:** Uzak mesafelerden gelmeyen ürünler, nakliye kaynaklı emisyonu azaltır.\n"
+            "8. **Ağaç Dikmeyi Destekleyin:** Doğal karbon yutaklarını korumak ve artırmak hayati önem taşır.\n"
+            "9. **Bilinçli Tüketim:** İhtiyacınız olmayan eşyaları almayın, tamir etmeyi ve ikinci eli tercih edin.\n"
+            "10. **Bilgi Paylaşın:** Çevrenizdekileri iklim krizi hakkında bilgilendirin ve farkındalık yaratın."
+        )
+        # ephemeral=True yaparsan mesajı sadece butona basan kişi görür. 
+        # Herkes görsün istiyorsan bu kısmı kaldırabilirsin.
+        await interaction.response.send_message(onlemler_metni, ephemeral=True)
+
+class MyBot(discord.Client):
+    def __init__(self):
+        intents = discord.Intents.default()
+        intents.members = True
+        intents.message_content = True
+        super().__init__(intents=intents)
+
+    async def on_ready(self):
+        print(f'✅ Bot Aktif: {self.user}')
+        
+        # Bot açıldığında butonu kanala gönder
+        channel = self.get_channel(ONLEMLER_KANAL_ID)
+        if channel:
+            # Kanalı temizleyip sadece butonu atmak istersen buraya temizleme kodu eklenebilir
+            await channel.purge(limit=5) # Eski buton mesajlarını temizler
+            await channel.send("🌍 **Geleceğimizi korumak elimizde!** Aşağıdaki butona basarak neler yapabileceğini öğren:", view=OnlemButonu())
+            print("📢 Buton kanala gönderildi.")
+
+bot = MyBot()
+bot.run("TOKEN")
